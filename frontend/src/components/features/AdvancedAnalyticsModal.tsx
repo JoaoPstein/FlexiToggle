@@ -49,15 +49,59 @@ export const AdvancedAnalyticsModal: React.FC<AdvancedAnalyticsModalProps> = ({
   onClose,
   flag
 }) => {
-  // Verificação de segurança
-  if (!flag && isOpen) {
-    return null;
-  }
-
   const [timeRange, setTimeRange] = useState('7d');
   const [selectedEnvironment, setSelectedEnvironment] = useState('all');
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const loadAnalytics = async () => {
+    setIsLoading(true);
+    try {
+      // Simular carregamento de analytics
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Dados mockados para demonstração
+      const mockData: AnalyticsData = {
+        totalEvaluations: Math.floor(Math.random() * 10000) + 1000,
+        uniqueUsers: Math.floor(Math.random() * 1000) + 100,
+        conversionRate: Math.random() * 100,
+        averageResponseTime: Math.random() * 100 + 50,
+        evaluationTrend: Array.from({ length: 30 }, (_, i) => ({
+          date: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          evaluations: Math.floor(Math.random() * 500) + 100,
+          uniqueUsers: Math.floor(Math.random() * 100) + 20
+        })),
+        environmentBreakdown: [
+          { name: 'Production', value: Math.floor(Math.random() * 5000) + 1000, color: '#10B981' },
+          { name: 'Staging', value: Math.floor(Math.random() * 2000) + 500, color: '#F59E0B' },
+          { name: 'Development', value: Math.floor(Math.random() * 1000) + 200, color: '#EF4444' }
+        ],
+        userSegments: [
+          { segment: 'Premium Users', evaluations: Math.floor(Math.random() * 3000) + 500, conversionRate: Math.random() * 50 + 25 },
+          { segment: 'Free Users', evaluations: Math.floor(Math.random() * 5000) + 1000, conversionRate: Math.random() * 25 + 5 },
+          { segment: 'Trial Users', evaluations: Math.floor(Math.random() * 1500) + 300, conversionRate: Math.random() * 40 + 10 }
+        ]
+      };
+      
+      setAnalytics(mockData);
+      console.log('Analytics loaded:', mockData);
+    } catch (error) {
+      console.error('Error loading analytics:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen && flag) {
+      loadAnalytics();
+    }
+  }, [isOpen, timeRange, selectedEnvironment, flag]);
+
+  // Verificação de segurança
+  if (!flag && isOpen) {
+    return null;
+  }
 
   const timeRangeOptions = [
     { value: '1d', label: 'Últimas 24 horas' },
@@ -73,59 +117,6 @@ export const AdvancedAnalyticsModal: React.FC<AdvancedAnalyticsModalProps> = ({
       label: env.environment.name
     })) || [])
   ];
-
-  useEffect(() => {
-    if (isOpen) {
-      loadAnalytics();
-    }
-  }, [isOpen, timeRange, selectedEnvironment]);
-
-  const loadAnalytics = async () => {
-    setIsLoading(true);
-    try {
-      // Simular dados de analytics (em produção, viria da API)
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockData: AnalyticsData = {
-        evaluations: {
-          total: Math.floor(Math.random() * 50000) + 10000,
-          enabled: Math.floor(Math.random() * 30000) + 5000,
-          disabled: Math.floor(Math.random() * 20000) + 3000,
-          trend: (Math.random() - 0.5) * 40 // -20% to +20%
-        },
-        performance: {
-          avgResponseTime: Math.random() * 50 + 10, // 10-60ms
-          errorRate: Math.random() * 2, // 0-2%
-          successRate: 98 + Math.random() * 2 // 98-100%
-        },
-        users: {
-          totalExposed: Math.floor(Math.random() * 10000) + 2000,
-          activeUsers: Math.floor(Math.random() * 5000) + 1000,
-          conversionRate: Math.random() * 15 + 5 // 5-20%
-        },
-        environments: flag.environments.reduce((acc, env) => {
-          acc[env.environment.name] = {
-            evaluations: Math.floor(Math.random() * 10000) + 1000,
-            enabled: Math.floor(Math.random() * 5000) + 500,
-            users: Math.floor(Math.random() * 2000) + 200
-          };
-          return acc;
-        }, {} as any),
-        timeline: Array.from({ length: 30 }, (_, i) => ({
-          date: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          evaluations: Math.floor(Math.random() * 2000) + 500,
-          users: Math.floor(Math.random() * 500) + 100,
-          enabled: Math.floor(Math.random() * 1000) + 200
-        }))
-      };
-
-      setAnalytics(mockData);
-    } catch (error) {
-      console.error('Error loading analytics:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const formatNumber = (num: number) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
