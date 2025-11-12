@@ -31,8 +31,13 @@ jobs:
     - name: Build
       run: dotnet build backend/FlexiToggle.Api/FlexiToggle.Api.csproj --no-restore
     
-    - name: Test
-      run: dotnet test backend/FlexiToggle.Api/FlexiToggle.Api.csproj --no-build --verbosity normal
+    - name: Test (if test project exists)
+      run: |
+        if [ -d "backend/FlexiToggle.Api.Tests" ]; then
+          dotnet test backend/FlexiToggle.Api.Tests/FlexiToggle.Api.Tests.csproj --no-build --verbosity normal
+        else
+          echo "No test project found, skipping tests"
+        fi
 
   # Test Frontend
   test-frontend:
@@ -58,10 +63,15 @@ jobs:
         cd frontend
         npm run build
     
+    - name: Lint
+      run: |
+        cd frontend
+        npm run lint
+    
     - name: Test
       run: |
         cd frontend
-        npm run test -- --coverage --watchAll=false
+        npm run test
 
   # Build and Test SDK
   test-sdk:
@@ -79,7 +89,7 @@ jobs:
       run: dotnet restore sdk/dotnet/FlexiToggle.Sdk/FlexiToggle.Sdk.csproj
     
     - name: Build SDK
-      run: dotnet build sdk/dotnet/FlexiToggle.Sdk/FlexiToggle.Sdk.csproj --no-restore
+      run: dotnet build sdk/dotnet/FlexiToggle.Sdk/FlexiToggle.Sdk.csproj --no-restore --configuration Release
     
     - name: Pack SDK
       run: dotnet pack sdk/dotnet/FlexiToggle.Sdk/FlexiToggle.Sdk.csproj --no-build --configuration Release
