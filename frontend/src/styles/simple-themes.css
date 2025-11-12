@@ -1,0 +1,131 @@
+/* Simple Theme System - Light/Dark Only */
+
+/* Default Light Theme */
+:root,
+.theme-light,
+body.theme-light,
+html.theme-light {
+  --primary-color: #3b82f6;
+  --secondary-color: #6366f1;
+  --background-color: #ffffff;
+  --surface-color: #f8fafc;
+  --text-color: #1e293b;
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+}
+
+/* Dark Theme */
+.theme-dark,
+body.theme-dark,
+html.theme-dark {
+  --primary-color: #60a5fa;
+  --secondary-color: #818cf8;
+  --background-color: #0f172a;
+  --surface-color: #1e293b;
+  --text-color: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border-color: #334155;
+}
+
+/* Apply theme variables to common elements */
+body {
+  background-color: var(--background-color) !important;
+  color: var(--text-color) !important;
+  transition: all 0.3s ease;
+}
+
+/* Force theme application */
+.theme-dark body,
+body.theme-dark {
+  background-color: var(--background-color) !important;
+  color: var(--text-color) !important;
+}
+
+.theme-light body,
+body.theme-light {
+  background-color: var(--background-color) !important;
+  color: var(--text-color) !important;
+}
+
+/* Common theme-aware classes with higher specificity */
+.theme-dark .bg-white,
+.theme-light .bg-white,
+body.theme-dark .bg-white,
+body.theme-light .bg-white {
+  background-color: var(--background-color) !important;
+}
+
+.theme-dark .bg-gray-50,
+.theme-light .bg-gray-50,
+body.theme-dark .bg-gray-50,
+body.theme-light .bg-gray-50 {
+  background-color: var(--surface-color) !important;
+}
+
+.theme-dark .text-gray-900,
+.theme-light .text-gray-900,
+body.theme-dark .text-gray-900,
+body.theme-light .text-gray-900 {
+  color: var(--text-color) !important;
+}
+
+.theme-dark .text-gray-600,
+.theme-light .text-gray-600,
+body.theme-dark .text-gray-600,
+body.theme-light .text-gray-600 {
+  color: var(--text-secondary) !important;
+}
+
+.theme-dark .border-gray-200,
+.theme-light .border-gray-200,
+body.theme-dark .border-gray-200,
+body.theme-light .border-gray-200 {
+  border-color: var(--border-color) !important;
+}
+
+/* Theme-aware gradients */
+.bg-gradient-to-r.from-blue-600.to-purple-600 {
+  background: linear-gradient(to right, var(--primary-color), var(--secondary-color)) !important;
+}
+
+/* Dark theme specific adjustments */
+.theme-dark .bg-white {
+  background-color: var(--surface-color) !important;
+}
+
+.theme-dark .shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+.theme-dark .border-gray-200 {
+  border-color: var(--border-color) !important;
+}
+
+.theme-dark .hover\:bg-gray-100:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.theme-dark .hover\:bg-gray-50:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Card backgrounds */
+.theme-dark .bg-white {
+  background-color: var(--surface-color) !important;
+}
+
+/* Input and form elements */
+.theme-dark input,
+.theme-dark select,
+.theme-dark textarea {
+  background-color: var(--surface-color) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-color) !important;
+}
+
+.theme-dark input:focus,
+.theme-dark select:focus,
+.theme-dark textarea:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1) !important;
+}

@@ -1,0 +1,53 @@
+services:
+  # Database
+  database:
+    image: postgres:15-alpine
+    container_name: flexitoggle-db
+    environment:
+      POSTGRES_DB: flexitoggle
+      POSTGRES_USER: flexitoggle
+      POSTGRES_PASSWORD: flexitoggle123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flexitoggle"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend/FlexiToggle.Api
+      dockerfile: Dockerfile
+    container_name: flexitoggle-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5078
+      - ConnectionStrings__DefaultConnection=Host=database;Database=flexitoggle;Username=flexitoggle;Password=flexitoggle123
+    ports:
+      - "5078:5078"
+    depends_on:
+      database:
+        condition: service_healthy
+
+  # Frontend (Development mode)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: flexitoggle-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://localhost:5078
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+
+volumes:
+  postgres_data:

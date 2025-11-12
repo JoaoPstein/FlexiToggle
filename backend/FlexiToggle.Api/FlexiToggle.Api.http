@@ -1,0 +1,6 @@
+@FlexiToggle.Api_HostAddress = http://localhost:5078
+
+GET {{FlexiToggle.Api_HostAddress}}/health/
+Accept: application/json
+
+###

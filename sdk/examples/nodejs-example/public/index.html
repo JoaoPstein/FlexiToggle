@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlexiToggle SDK - Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">FlexiToggle SDK Demo</h1>
+            <p class="text-gray-600">Demonstração prática do SDK em ação</p>
+        </div>
+
+        <!-- Status -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-800">Status da Conexão</h2>
+                    <p class="text-gray-600">Estado atual do FlexiToggle SDK</p>
+                </div>
+                <div id="connection-status" class="flex items-center">
+                    <div class="w-3 h-3 bg-yellow-500 rounded-full mr-2 animate-pulse"></div>
+                    <span class="text-yellow-600">Conectando...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature Flags -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div class="feature-card bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Modo Escuro</h3>
+                    <div id="dark-mode-status" class="w-4 h-4 bg-gray-300 rounded-full"></div>
+                </div>
+                <p class="text-gray-600 text-sm mb-4">Ativa/desativa o tema escuro da aplicação</p>
+                <div class="text-xs text-gray-500">Flag: <code>dark-mode</code></div>
+            </div>
+
+            <div class="feature-card bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Novo Checkout</h3>
+                    <div id="new-checkout-status" class="w-4 h-4 bg-gray-300 rounded-full"></div>
+                </div>
+                <p class="text-gray-600 text-sm mb-4">Nova versão do processo de checkout</p>
+                <div class="text-xs text-gray-500">Flag: <code>new-checkout</code></div>
+            </div>
+
+            <div class="feature-card bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Recursos Premium</h3>
+                    <div id="premium-features-status" class="w-4 h-4 bg-gray-300 rounded-full"></div>
+                </div>
+                <p class="text-gray-600 text-sm mb-4">Acesso aos recursos premium</p>
+                <div class="text-xs text-gray-500">Flag: <code>premium-features</code></div>
+            </div>
+        </div>
+
+        <!-- Configuration Values -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Valores de Configuração</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-medium text-gray-800">Mensagem de Boas-vindas</h4>
+                    <p id="welcome-message" class="text-gray-600 mt-1">Carregando...</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-medium text-gray-800">Tema Atual</h4>
+                    <p id="current-theme" class="text-gray-600 mt-1">Carregando...</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-medium text-gray-800">Máximo de Itens</h4>
+                    <p id="max-items" class="text-gray-600 mt-1">Carregando...</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-medium text-gray-800">Desconto (%)</h4>
+                    <p id="discount-percent" class="text-gray-600 mt-1">Carregando...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- A/B Testing -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Teste A/B - Checkout</h2>
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600">Variante atual do teste de checkout</p>
+                    <p id="checkout-variant" class="text-lg font-medium text-blue-600 mt-1">Carregando...</p>
+                </div>
+                <button id="simulate-purchase" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    Simular Compra
+                </button>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Ações</h2>
+            <div class="flex flex-wrap gap-4">
+                <button id="refresh-flags" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    🔄 Atualizar Flags
+                </button>
+                <button id="change-user" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    👤 Mudar Usuário
+                </button>
+                <button id="track-event" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    📊 Trackear Evento
+                </button>
+            </div>
+        </div>
+
+        <!-- Debug Info -->
+        <div class="bg-gray-800 text-green-400 rounded-lg p-4 mt-8 font-mono text-sm">
+            <h3 class="text-white mb-2">Debug Info:</h3>
+            <div id="debug-info">Carregando informações de debug...</div>
+        </div>
+    </div>
+
+    <script>
+        let features = {};
+        
+        // Função para atualizar o status da conexão
+        function updateConnectionStatus(connected) {
+            const statusEl = document.getElementById('connection-status');
+            if (connected) {
+                statusEl.innerHTML = '<div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div><span class="text-green-600">Conectado</span>';
+            } else {
+                statusEl.innerHTML = '<div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div><span class="text-red-600">Desconectado</span>';
+            }
+        }
+
+        // Função para atualizar as feature flags na UI
+        function updateFeatureFlags(data) {
+            features = data.features;
+            
+            // Atualizar flags booleanas
+            updateFlagStatus('dark-mode-status', features.darkMode);
+            updateFlagStatus('new-checkout-status', features.newCheckout);
+            updateFlagStatus('premium-features-status', features.premiumFeatures);
+            
+            // Atualizar valores de configuração
+            document.getElementById('welcome-message').textContent = features.welcomeMessage;
+            document.getElementById('current-theme').textContent = features.theme;
+            document.getElementById('max-items').textContent = features.maxItems;
+            document.getElementById('discount-percent').textContent = features.discountPercent + '%';
+            
+            // Atualizar teste A/B
+            document.getElementById('checkout-variant').textContent = features.checkoutVariant;
+            
+            // Atualizar debug info
+            document.getElementById('debug-info').textContent = JSON.stringify(data, null, 2);
+            
+            updateConnectionStatus(true);
+        }
+
+        function updateFlagStatus(elementId, enabled) {
+            const element = document.getElementById(elementId);
+            if (enabled) {
+                element.className = 'w-4 h-4 bg-green-500 rounded-full';
+            } else {
+                element.className = 'w-4 h-4 bg-red-500 rounded-full';
+            }
+        }
+
+        // Carregar features iniciais
+        async function loadFeatures() {
+            try {
+                const response = await fetch('/api/features');
+                const data = await response.json();
+                if (data.success) {
+                    updateFeatureFlags(data);
+                } else {
+                    updateConnectionStatus(false);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar features:', error);
+                updateConnectionStatus(false);
+            }
+        }
+
+        // Event listeners
+        document.getElementById('refresh-flags').addEventListener('click', async () => {
+            try {
+                await fetch('/api/refresh-flags', { method: 'POST' });
+                await loadFeatures();
+                alert('Flags atualizadas com sucesso!');
+            } catch (error) {
+                alert('Erro ao atualizar flags');
+            }
+        });
+
+        document.getElementById('change-user').addEventListener('click', async () => {
+            const userId = prompt('Digite o novo ID do usuário:');
+            if (userId) {
+                try {
+                    await fetch('/api/update-user', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            userId,
+                            attributes: { 
+                                plan: Math.random() > 0.5 ? 'premium' : 'basic',
+                                country: 'BR'
+                            }
+                        })
+                    });
+                    await loadFeatures();
+                    alert('Usuário atualizado com sucesso!');
+                } catch (error) {
+                    alert('Erro ao atualizar usuário');
+                }
+            }
+        });
+
+        document.getElementById('track-event').addEventListener('click', async () => {
+            try {
+                await fetch('/api/track-conversion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        event: 'button_click',
+                        value: 1
+                    })
+                });
+                alert('Evento registrado com sucesso!');
+            } catch (error) {
+                alert('Erro ao registrar evento');
+            }
+        });
+
+        document.getElementById('simulate-purchase').addEventListener('click', async () => {
+            try {
+                await fetch('/api/track-conversion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        event: 'purchase',
+                        value: Math.floor(Math.random() * 100) + 10
+                    })
+                });
+                alert('Compra simulada com sucesso!');
+            } catch (error) {
+                alert('Erro ao simular compra');
+            }
+        });
+
+        // Carregar features na inicialização
+        loadFeatures();
+        
+        // Atualizar features a cada 30 segundos
+        setInterval(loadFeatures, 30000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # Database
+  database:
+    image: mongo:7-jammy
+    container_name: flexitoggle-db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: flexitoggle
+      MONGO_INITDB_ROOT_PASSWORD: flexitoggle123
+      MONGO_INITDB_DATABASE: flexitoggle
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend/FlexiToggle.Api
+      dockerfile: Dockerfile
+    container_name: flexitoggle-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5078
+      - ConnectionStrings__DefaultConnection=mongodb://flexitoggle:flexitoggle123@database:27017/flexitoggle?authSource=admin
+    ports:
+      - "5078:5078"
+    depends_on:
+      database:
+        condition: service_healthy
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: flexitoggle-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://localhost:5078
+
+volumes:
+  mongodb_data:

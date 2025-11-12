@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FlexiToggle - Gerenciamento de Feature Flags</title>
+    
+    <!-- Theme initialization script -->
+    <script>
+      (function() {
+        const savedTheme = localStorage.getItem('featurehub-theme') || 'light';
+        console.log('HTML: Applying theme', savedTheme);
+        
+        document.documentElement.classList.add('theme-' + savedTheme);
+        document.body.classList.add('theme-' + savedTheme);
+        
+        // Apply immediate styles to prevent flash
+        if (savedTheme === 'dark') {
+          document.documentElement.style.backgroundColor = '#0f172a';
+          document.documentElement.style.color = '#f1f5f9';
+        } else {
+          document.documentElement.style.backgroundColor = '#ffffff';
+          document.documentElement.style.color = '#1e293b';
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

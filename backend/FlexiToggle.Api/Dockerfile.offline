@@ -1,0 +1,31 @@
+# Dockerfile alternativo que funciona mesmo com problemas de conectividade
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /app
+
+# Configure NuGet to use local cache and fallback sources
+RUN dotnet nuget add source https://api.nuget.org/v3/index.json -n nuget.org --configfile /usr/share/dotnet/NuGetDefaults.Config || true
+
+# Copy csproj and try restore with retries
+COPY *.csproj ./
+RUN for i in 1 2 3; do dotnet restore --no-cache --force && break || sleep 10; done
+
+# Copy everything else and build
+COPY . ./
+RUN dotnet publish -c Release -o out --no-restore
+
+# Use the official .NET 8 runtime image for running
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+
+# Copy the published app
+COPY --from=build /app/out .
+
+# Expose port
+EXPOSE 5078
+
+# Set environment variables
+ENV ASPNETCORE_URLS=http://+:5078
+ENV ASPNETCORE_ENVIRONMENT=Development
+
+# Run the application
+ENTRYPOINT ["dotnet", "FlexiToggle.Api.dll"]
