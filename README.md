@@ -474,44 +474,6 @@ kubectl apply -f k8s/
 az webapp create --name flexitoggle --resource-group myRG
 ```
 
-## 🤝 Contribuindo
-
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-## 📄 Licença
-
-Este projeto está licenciado sob a MIT License - veja o arquivo [LICENSE](LICENSE) para detalhes.
-
-## 🆘 Suporte
-
-- **Documentação**: [docs.flexitoggle.com](https://docs.flexitoggle.com)
-- **Issues**: [GitHub Issues](https://github.com/your-org/FlexiToggle/issues)
-- **Discord**: [FlexiToggle Community](https://discord.gg/flexitoggle)
-- **Email**: support@flexitoggle.com
-
-## 🎯 Roadmap
-
-### **Q1 2024**
-- ✅ IA com ML.NET implementada
-- ✅ Banco físico MySQL
-- ✅ Smart Rollouts
-- ✅ Detecção de anomalias
-- ✅ Analytics avançados
-
-### **Q2 2024**
-- 🔄 Integração com Kubernetes
-- 🔄 Plugin para VS Code
-- 🔄 Mobile SDKs (iOS/Android)
-- 🔄 Webhooks avançados
-
-### **Q3 2024**
-- 📋 Multi-tenancy
-- 📋 Advanced RBAC
-- 📋 Custom ML Models
 - 📋 Real-time collaboration
 
 ---
