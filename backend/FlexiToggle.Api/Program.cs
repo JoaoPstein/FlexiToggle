@@ -98,6 +98,9 @@ builder.Services.AddSignalR();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IFeatureFlagService, FeatureFlagService>();
 
+// Register AI services
+builder.Services.AddScoped<IRolloutAIService, MLNetRolloutAIService>();
+
 // Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

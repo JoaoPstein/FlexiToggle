@@ -162,43 +162,121 @@ export const SmartRolloutModal: React.FC<SmartRolloutModalProps> = ({
     setIsSimulating(true);
     
     try {
-      // Simular análise de IA
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // CHAMADA REAL PARA API DE IA
+      const response = await fetch('/api/rollout-ai/simulate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          projectKey: 'corebanking-ipj1gw', // Em produção, vir do contexto
+          environment: 'development',
+          featureFlagKey: flagName,
+          configuration: {
+            steps: config.rolloutSteps.map((step, index) => ({
+              stepNumber: index + 1,
+              percentageTarget: step.percentage,
+              duration: `${step.duration}:00:00`, // Converter para TimeSpan format
+              conditions: []
+            })),
+            targetMetrics: {
+              conversion_rate: config.targetMetrics.conversionRate,
+              error_rate: config.targetMetrics.errorRate,
+              response_time: config.targetMetrics.responseTime,
+              user_satisfaction: config.targetMetrics.userSatisfaction
+            },
+            safetyLimits: {
+              error_rate: config.safetyLimits.maxErrorRate,
+              response_time: config.safetyLimits.maxResponseTime,
+              conversion_rate: config.safetyLimits.minConversionRate
+            },
+            strategy: config.strategy
+          },
+          baselineMetrics: [
+            {
+              timestamp: new Date().toISOString(),
+              metricName: 'error_rate',
+              value: 0.5,
+              tags: {}
+            },
+            {
+              timestamp: new Date().toISOString(),
+              metricName: 'response_time',
+              value: 150,
+              tags: {}
+            },
+            {
+              timestamp: new Date().toISOString(),
+              metricName: 'conversion_rate',
+              value: 12.5,
+              tags: {}
+            }
+          ],
+          simulationDays: 30
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const aiResults = await response.json();
       
+      // Converter resultado da API para formato do frontend
       const results = {
-        predictedSuccess: Math.random() * 0.3 + 0.7, // 70-100%
-        riskFactors: [
-          { factor: 'Horário de pico', risk: 'medium', impact: 0.15 },
-          { factor: 'Histórico de rollouts', risk: 'low', impact: 0.05 },
-          { factor: 'Complexidade da feature', risk: 'high', impact: 0.25 }
+        predictedSuccess: aiResults.overallPrediction?.successProbability || 0.75,
+        riskFactors: aiResults.overallPrediction?.riskFactors?.map((rf: any) => ({
+          factor: rf.name,
+          risk: rf.level.toLowerCase(),
+          impact: rf.impact
+        })) || [],
+        recommendations: aiResults.recommendedAdjustments || [
+          '🎯 Rollout otimizado pela IA',
+          '📊 Monitoramento automático ativado',
+          '🚨 Alertas configurados automaticamente'
         ],
-        recommendations: [
-          '🎯 Iniciar rollout durante horário de baixo tráfego',
-          '📊 Monitorar métricas de performance nos primeiros 30 minutos',
-          '🚨 Configurar alertas automáticos para taxa de erro > 1%',
-          '⚡ Considerar rollout mais lento devido à complexidade da feature'
-        ],
-        optimizedSteps: config.rolloutSteps.map((step, index) => ({
-          ...step,
-          aiRecommendation: index === 0 ? 'proceed' : 
-                           index === 1 ? 'proceed' :
-                           index === 2 ? 'pause' : 'proceed',
-          estimatedDuration: step.duration * (0.8 + Math.random() * 0.4)
-        }))
+        optimizedSteps: aiResults.simulationSteps?.map((step: any) => ({
+          ...step.step,
+          aiRecommendation: step.aiDecision?.recommendedAction?.toLowerCase() || 'proceed',
+          estimatedDuration: step.estimatedDuration || step.step.duration
+        })) || config.rolloutSteps
       };
       
       setSimulationResults(results);
       
       addToast({
         type: 'success',
-        title: 'Simulação IA Concluída',
+        title: 'IA Real Executada!',
         message: `Sucesso previsto: ${(results.predictedSuccess * 100).toFixed(1)}%`
       });
     } catch (error) {
+      console.error('Erro na simulação de IA:', error);
+      
+      // Fallback para simulação local
+      const fallbackResults = {
+        predictedSuccess: 0.75,
+        riskFactors: [
+          { factor: 'API de IA indisponível', risk: 'medium', impact: 0.1 }
+        ],
+        recommendations: [
+          '⚠️ Usando análise local (API de IA indisponível)',
+          '📊 Monitorar métricas manualmente',
+          '🚨 Configurar alertas manuais'
+        ],
+        optimizedSteps: config.rolloutSteps.map((step, index) => ({
+          ...step,
+          aiRecommendation: 'proceed',
+          estimatedDuration: step.duration
+        }))
+      };
+      
+      setSimulationResults(fallbackResults);
+      
       addToast({
-        type: 'error',
-        title: 'Erro na Simulação',
-        message: 'Não foi possível executar a simulação de IA'
+        type: 'warning',
+        title: 'Usando Análise Local',
+        message: 'API de IA indisponível, usando análise básica'
       });
     } finally {
       setIsSimulating(false);
