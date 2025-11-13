@@ -33,11 +33,11 @@ builder.Services.AddControllers()
 builder.Services.AddFluentValidationAutoValidation()
     .AddFluentValidationClientsideAdapters();
 
-// Configure Entity Framework with SQLite Database
+// Configure Entity Framework with MySQL Database
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? 
-                       "Data Source=FlexiToggle.db";
+                       "Server=localhost;Database=FlexiToggleDB;User=root;Password=;";
 builder.Services.AddDbContext<FlexiToggleContext>(options =>
-    options.UseSqlite(connectionString));
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 // Configure AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
