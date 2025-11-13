@@ -43,16 +43,14 @@ public class MLNetRolloutAIService : IRolloutAIService
                 };
             }
 
-            // Criar pipeline de detecção de anomalias usando PCA
+            // Criar pipeline de detecção de anomalias usando IID Spike Detection
             var dataView = _mlContext.Data.LoadFromEnumerable(anomalyData);
             
-            var pipeline = _mlContext.Transforms.DetectAnomaliesBySrCnn(
+            var pipeline = _mlContext.Transforms.DetectIidSpike(
                 outputColumnName: "Anomaly",
                 inputColumnName: nameof(AnomalyInputData.Value),
-                threshold: 0.3,
-                batchSize: Math.Min(512, anomalyData.Count),
-                sensitivity: 90.0,
-                detectMode: SrCnnDetectMode.AnomalyAndMargin);
+                confidence: 95,
+                pvalueHistoryLength: Math.Min(50, anomalyData.Count / 4));
 
             var model = pipeline.Fit(dataView);
             var predictions = model.Transform(dataView);
@@ -68,19 +66,19 @@ public class MLNetRolloutAIService : IRolloutAIService
 
                 if (prediction.Prediction[0] == 1) // Anomalia detectada
                 {
-                    var severity = prediction.Prediction[2] > 0.8 ? "Critical" :
-                                  prediction.Prediction[2] > 0.6 ? "High" :
-                                  prediction.Prediction[2] > 0.4 ? "Medium" : "Low";
+                    var severity = prediction.Prediction[1] > 0.8 ? "Critical" :
+                                  prediction.Prediction[1] > 0.6 ? "High" :
+                                  prediction.Prediction[1] > 0.4 ? "Medium" : "Low";
 
                     anomalies.Add(new AnomalyAlert
                     {
                         MetricName = request.MetricHistory[i].MetricName,
                         CurrentValue = originalData.Value,
-                        ExpectedValue = prediction.Prediction[1],
-                        Deviation = Math.Abs(originalData.Value - prediction.Prediction[1]),
+                        ExpectedValue = originalData.Value * 0.9f, // Estimativa simples
+                        Deviation = Math.Abs(originalData.Value * 0.1f),
                         Severity = severity,
                         DetectedAt = DateTime.Parse(originalData.Timestamp),
-                        Description = $"Anomalia detectada: valor {originalData.Value:F2} desvia {Math.Abs(originalData.Value - prediction.Prediction[1]):F2} do esperado"
+                        Description = $"Anomalia detectada: valor {originalData.Value:F2} fora do padrão esperado"
                     });
                 }
             }
