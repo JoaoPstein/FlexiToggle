@@ -60,27 +60,51 @@ export const AdvancedAnalyticsModal: React.FC<AdvancedAnalyticsModalProps> = ({
       // Simular carregamento de analytics
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Dados mockados para demonstração
+      // Dados mockados para demonstração - ESTRUTURA CORRIGIDA
+      const totalEvaluations = Math.floor(Math.random() * 10000) + 1000;
+      const enabledEvaluations = Math.floor(totalEvaluations * 0.7);
+      const disabledEvaluations = totalEvaluations - enabledEvaluations;
+      
       const mockData: AnalyticsData = {
-        totalEvaluations: Math.floor(Math.random() * 10000) + 1000,
-        uniqueUsers: Math.floor(Math.random() * 1000) + 100,
-        conversionRate: Math.random() * 100,
-        averageResponseTime: Math.random() * 100 + 50,
-        evaluationTrend: Array.from({ length: 30 }, (_, i) => ({
+        evaluations: {
+          total: totalEvaluations,
+          enabled: enabledEvaluations,
+          disabled: disabledEvaluations,
+          trend: (Math.random() - 0.5) * 20 // -10% a +10%
+        },
+        performance: {
+          avgResponseTime: Math.random() * 100 + 50,
+          errorRate: Math.random() * 5,
+          successRate: 95 + Math.random() * 5
+        },
+        users: {
+          totalExposed: Math.floor(Math.random() * 1000) + 100,
+          activeUsers: Math.floor(Math.random() * 800) + 50,
+          conversionRate: Math.random() * 100
+        },
+        environments: {
+          production: {
+            evaluations: Math.floor(totalEvaluations * 0.6),
+            enabled: Math.floor(enabledEvaluations * 0.7),
+            users: Math.floor(Math.random() * 500) + 100
+          },
+          staging: {
+            evaluations: Math.floor(totalEvaluations * 0.25),
+            enabled: Math.floor(enabledEvaluations * 0.2),
+            users: Math.floor(Math.random() * 200) + 50
+          },
+          development: {
+            evaluations: Math.floor(totalEvaluations * 0.15),
+            enabled: Math.floor(enabledEvaluations * 0.1),
+            users: Math.floor(Math.random() * 100) + 20
+          }
+        },
+        timeline: Array.from({ length: 30 }, (_, i) => ({
           date: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           evaluations: Math.floor(Math.random() * 500) + 100,
-          uniqueUsers: Math.floor(Math.random() * 100) + 20
-        })),
-        environmentBreakdown: [
-          { name: 'Production', value: Math.floor(Math.random() * 5000) + 1000, color: '#10B981' },
-          { name: 'Staging', value: Math.floor(Math.random() * 2000) + 500, color: '#F59E0B' },
-          { name: 'Development', value: Math.floor(Math.random() * 1000) + 200, color: '#EF4444' }
-        ],
-        userSegments: [
-          { segment: 'Premium Users', evaluations: Math.floor(Math.random() * 3000) + 500, conversionRate: Math.random() * 50 + 25 },
-          { segment: 'Free Users', evaluations: Math.floor(Math.random() * 5000) + 1000, conversionRate: Math.random() * 25 + 5 },
-          { segment: 'Trial Users', evaluations: Math.floor(Math.random() * 1500) + 300, conversionRate: Math.random() * 40 + 10 }
-        ]
+          users: Math.floor(Math.random() * 100) + 20,
+          enabled: Math.floor(Math.random() * 300) + 50
+        }))
       };
       
       setAnalytics(mockData);
@@ -112,9 +136,9 @@ export const AdvancedAnalyticsModal: React.FC<AdvancedAnalyticsModalProps> = ({
 
   const environmentOptions = [
     { value: 'all', label: 'Todos os ambientes' },
-    ...(flag?.environments?.map(env => ({
-      value: env.environment.id.toString(),
-      label: env.environment.name
+    ...(flag?.Environments?.map(env => ({
+      value: env.Environment.Id.toString(),
+      label: env.Environment.Name
     })) || [])
   ];
 
@@ -125,6 +149,15 @@ export const AdvancedAnalyticsModal: React.FC<AdvancedAnalyticsModalProps> = ({
   };
 
   const formatPercentage = (num: number) => `${num.toFixed(1)}%`;
+
+  // Validação de dados
+  const isDataValid = (data: AnalyticsData | null): data is AnalyticsData => {
+    return data !== null && 
+           data.evaluations !== undefined && 
+           data.performance !== undefined && 
+           data.users !== undefined && 
+           data.environments !== undefined;
+  };
 
   if (!analytics && !isLoading) return null;
 
@@ -137,7 +170,7 @@ export const AdvancedAnalyticsModal: React.FC<AdvancedAnalyticsModalProps> = ({
           </div>
           <div>
             <h2 className="text-xl font-semibold text-gray-900">Analytics Avançados</h2>
-            <p className="text-sm text-gray-500">Métricas detalhadas para "{flag.name}"</p>
+            <p className="text-sm text-gray-500">Métricas detalhadas para "{flag.Name}"</p>
           </div>
         </div>
         <Button variant="outline" size="sm" onClick={onClose}>
@@ -173,7 +206,7 @@ export const AdvancedAnalyticsModal: React.FC<AdvancedAnalyticsModalProps> = ({
               <p className="text-gray-500">Carregando analytics...</p>
             </div>
           </div>
-        ) : analytics ? (
+        ) : isDataValid(analytics) ? (
           <div className="space-y-6">
             {/* Métricas Principais */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -417,7 +450,19 @@ export const AdvancedAnalyticsModal: React.FC<AdvancedAnalyticsModalProps> = ({
               </CardContent>
             </Card>
           </div>
-        ) : null}
+        ) : (
+          <div className="p-6 text-center">
+            <p className="text-gray-500">Não foi possível carregar os dados de analytics.</p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={loadAnalytics}
+              className="mt-4"
+            >
+              Tentar Novamente
+            </Button>
+          </div>
+        )}
       </div>
     </Modal>
   );

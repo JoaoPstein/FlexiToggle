@@ -168,9 +168,16 @@ public class EvaluationController : ControllerBase
             return GetDefaultValue(flag.Type);
         }
 
-        // For now, return the default value or a simple evaluation
-        // In a real implementation, you'd check targeting rules, user attributes, etc.
-        return envFlag.DefaultValue ?? GetDefaultValue(flag.Type);
+        // CORREÇÃO CRÍTICA: Para flags boolean, retornar o estado IsEnabled
+        // Para outros tipos, usar DefaultValue
+        return flag.Type switch
+        {
+            Models.FeatureFlagType.Boolean => envFlag.IsEnabled, // CORREÇÃO CRÍTICA
+            Models.FeatureFlagType.String => envFlag.DefaultValue ?? "",
+            Models.FeatureFlagType.Number => int.TryParse(envFlag.DefaultValue, out var num) ? num : 0,
+            Models.FeatureFlagType.Json => envFlag.DefaultValue ?? "{}",
+            _ => envFlag.IsEnabled
+        };
     }
 
     private object GetDefaultValue(Models.FeatureFlagType type)

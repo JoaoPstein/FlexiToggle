@@ -33,9 +33,11 @@ builder.Services.AddControllers()
 builder.Services.AddFluentValidationAutoValidation()
     .AddFluentValidationClientsideAdapters();
 
-// Configure Entity Framework with In-Memory Database (temporary)
+// Configure Entity Framework with MySQL Database
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? 
+                       "Server=localhost;Database=FlexiToggleDB;User=root;Password=;";
 builder.Services.AddDbContext<FlexiToggleContext>(options =>
-    options.UseInMemoryDatabase("FeatureHubDB"));
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 // Configure AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
@@ -97,6 +99,9 @@ builder.Services.AddSignalR();
 // Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IFeatureFlagService, FeatureFlagService>();
+
+// Register AI services
+builder.Services.AddScoped<IRolloutAIService, MLNetRolloutAIService>();
 
 // Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -173,11 +178,16 @@ app.MapControllers();
 // Map SignalR Hub
 app.MapHub<FlexiToggleHub>("/hubs/flexitoggle");
 
-// Initialize database with seed data
+// Initialize database with migrations and seed data
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<FlexiToggleContext>();
-    context.Database.EnsureCreated();
+    
+    // Apply pending migrations automatically
+    context.Database.Migrate();
+    
+    // Seed initial data if needed
+    // context.SeedData(); // Uncomment if you have seed data
 }
 
 // Health check endpoint
